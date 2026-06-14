@@ -32,12 +32,13 @@ export function buildSummaries(
   budgets: BudgetLimits,
   month: string,
   categories: string[] = ALL_CATEGORIES,
+  scaleFactor: number = 1,
 ): CategorySummary[] {
   const filtered = filterByMonth(transactions, month);
   const sums = sumByCategory(filtered, categories);
   return categories.map(cat => {
     const spent = sums[cat] ?? 0;
-    const limit = budgets[cat] ?? 0;
+    const limit = (budgets[cat] ?? 0) * scaleFactor;
     const percentage = limit > 0 ? (spent / limit) * 100 : 0;
     return { category: cat, spent, limit, percentage, status: getStatus(spent, limit) };
   });

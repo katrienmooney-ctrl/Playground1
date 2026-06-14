@@ -116,7 +116,7 @@ function App() {
                 />
                 <main className="flex-1 overflow-y-auto p-6">
                   {activePage === 'dashboard' && <DashboardPage selectedMonth={selectedMonth} />}
-                  {activePage === 'transactions' && <TransactionsPage />}
+                  {activePage === 'transactions' && <TransactionsPage selectedMonth={selectedMonth} />}
                   {activePage === 'breakdown' && <BreakdownPage selectedMonth={selectedMonth} />}
                   {activePage === 'totals' && <TotalsPage />}
                   {activePage === 'tips' && <TipsPage selectedMonth={selectedMonth} />}
