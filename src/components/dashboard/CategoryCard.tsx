@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import type { CategorySummary } from '../../types';
 import { CategoryContext } from '../../App';
 
@@ -30,6 +30,11 @@ export function CategoryCard({ summary, onSetLimit }: Props) {
   const { category, spent, limit, percentage, status } = summary;
   const displayPct = Math.min(percentage, 100);
   const color = getCategoryColor(category);
+  const [inputVal, setInputVal] = useState(limit > 0 ? String(limit) : '');
+
+  useEffect(() => {
+    setInputVal(limit > 0 ? String(limit) : '');
+  }, [limit]);
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-3">
@@ -80,12 +85,16 @@ export function CategoryCard({ summary, onSetLimit }: Props) {
         <input
           type="number"
           placeholder="Set limit"
-          defaultValue={limit > 0 ? limit : ''}
+          value={inputVal}
           min={0}
           step={10}
+          onChange={e => setInputVal(e.target.value)}
           onBlur={e => {
             const val = parseFloat(e.target.value);
             if (!isNaN(val) && val >= 0) onSetLimit(category, val);
+          }}
+          onKeyDown={e => {
+            if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
           }}
           className="ml-auto border border-gray-200 rounded px-2 py-0.5 text-xs w-24 focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
