@@ -3,7 +3,7 @@ import { TransactionContext } from '../App';
 import { CsvUpload } from '../components/transactions/CsvUpload';
 import { ManualEntryForm } from '../components/transactions/ManualEntryForm';
 import { TransactionTable } from '../components/transactions/TransactionTable';
-import type { Transaction, Category } from '../types';
+import type { Transaction } from '../types';
 
 export function TransactionsPage() {
   const { transactions, addTransactions, updateCategory, deleteTransaction, clearAll } = useContext(TransactionContext);
@@ -59,7 +59,7 @@ export function TransactionsPage() {
       {tab === 'table' && (
         <TransactionTable
           transactions={transactions}
-          onUpdateCategory={(id, cat) => updateCategory(id, cat as Category)}
+          onUpdateCategory={updateCategory}
           onDelete={deleteTransaction}
         />
       )}

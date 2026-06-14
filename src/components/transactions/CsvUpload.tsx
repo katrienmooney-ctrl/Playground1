@@ -1,7 +1,8 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useContext } from 'react';
 import type { DragEvent, ChangeEvent } from 'react';
 import type { Transaction } from '../../types';
 import { parseCSV } from '../../utils/csvParser';
+import { CategoryRulesContext } from '../../App';
 
 interface Props {
   existingTransactions: Transaction[];
@@ -9,9 +10,10 @@ interface Props {
 }
 
 export function CsvUpload({ existingTransactions, onImport }: Props) {
+  const { applyRule } = useContext(CategoryRulesContext);
   const [isDragging, setIsDragging] = useState(false);
   const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-  const [preview, setPreview] = useState<{ count: number; skipped: number } | null>(null);
+  const [preview, setPreview] = useState<{ count: number; skipped: number; ruleApplied: number } | null>(null);
   const [pending, setPending] = useState<Transaction[] | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -19,7 +21,7 @@ export function CsvUpload({ existingTransactions, onImport }: Props) {
     setStatus(null);
     setPending(null);
     setPreview(null);
-    const result = await parseCSV(file, existingTransactions);
+    const result = await parseCSV(file, existingTransactions, applyRule);
     if (result.error) {
       setStatus({ type: 'error', message: result.error });
       return;
@@ -29,7 +31,7 @@ export function CsvUpload({ existingTransactions, onImport }: Props) {
       return;
     }
     setPending(result.transactions);
-    setPreview({ count: result.transactions.length, skipped: result.skipped });
+    setPreview({ count: result.transactions.length, skipped: result.skipped, ruleApplied: result.ruleApplied });
   }
 
   function handleDrop(e: DragEvent<HTMLDivElement>) {
@@ -74,13 +76,18 @@ export function CsvUpload({ existingTransactions, onImport }: Props) {
 
       {preview && pending && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center justify-between">
-          <div>
+          <div className="space-y-0.5">
             <p className="text-blue-800 font-medium">Ready to import {preview.count} transactions</p>
+            {preview.ruleApplied > 0 && (
+              <p className="text-blue-700 text-sm">
+                ✓ {preview.ruleApplied} auto-categorized using your saved rules
+              </p>
+            )}
             {preview.skipped > 0 && (
               <p className="text-blue-600 text-sm">{preview.skipped} rows skipped (credits, duplicates, or invalid)</p>
             )}
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 shrink-0">
             <button
               onClick={() => { setPending(null); setPreview(null); }}
               className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-100"

@@ -1,9 +1,10 @@
 import { createContext, useCallback, useContext, useState } from 'react';
-import type { Page, Transaction, BudgetLimits } from './types';
+import type { Page, Transaction, BudgetLimits, CategoryRule } from './types';
 import { ALL_CATEGORIES } from './types';
 import { useTransactions } from './hooks/useTransactions';
 import { useBudgets } from './hooks/useBudgets';
 import { useCategories } from './hooks/useCategories';
+import { useCategoryRules } from './hooks/useCategoryRules';
 import { getAvailableMonths } from './utils/budgetCalc';
 import { CATEGORY_COLORS, CUSTOM_COLOR_PALETTE } from './constants/categories';
 import { Sidebar } from './components/layout/Sidebar';
@@ -16,10 +17,11 @@ import { TipsPage } from './pages/TipsPage';
 import { CalculatorPage } from './pages/CalculatorPage';
 import { CategoriesPage } from './pages/CategoriesPage';
 
-interface TransactionContextType {
+export interface TransactionContextType {
   transactions: Transaction[];
   addTransactions: (txns: Transaction[]) => void;
   updateCategory: (id: string, category: string) => void;
+  updateCategoryByDescription: (descriptionRaw: string, category: string) => void;
   deleteTransaction: (id: string) => void;
   clearAll: () => void;
 }
@@ -37,10 +39,18 @@ export interface CategoryContextType {
   isBuiltIn: (name: string) => boolean;
 }
 
+export interface CategoryRulesContextType {
+  rules: CategoryRule[];
+  addRule: (descriptionRaw: string, category: string) => void;
+  applyRule: (description: string) => string | null;
+  deleteRule: (descriptionNorm: string) => void;
+}
+
 export const TransactionContext = createContext<TransactionContextType>({
   transactions: [],
   addTransactions: () => {},
   updateCategory: () => {},
+  updateCategoryByDescription: () => {},
   deleteTransaction: () => {},
   clearAll: () => {},
 });
@@ -58,6 +68,13 @@ export const CategoryContext = createContext<CategoryContextType>({
   isBuiltIn: () => true,
 });
 
+export const CategoryRulesContext = createContext<CategoryRulesContextType>({
+  rules: [],
+  addRule: () => {},
+  applyRule: () => null,
+  deleteRule: () => {},
+});
+
 export function useCategoryContext() {
   return useContext(CategoryContext);
 }
@@ -66,6 +83,7 @@ function App() {
   const txState = useTransactions();
   const budgetState = useBudgets();
   const { customCategories, addCategory, deleteCategory } = useCategories();
+  const rulesState = useCategoryRules();
   const [activePage, setActivePage] = useState<Page>('dashboard');
   const [selectedMonth, setSelectedMonth] = useState<string>('all');
 
@@ -87,25 +105,27 @@ function App() {
     <TransactionContext.Provider value={txState}>
       <BudgetContext.Provider value={budgetState}>
         <CategoryContext.Provider value={{ allCategories, getCategoryColor, addCategory, deleteCategory, isBuiltIn }}>
-          <div className="flex h-screen bg-gray-50 overflow-hidden">
-            <Sidebar activePage={activePage} onNavigate={setActivePage} />
-            <div className="flex-1 flex flex-col min-w-0">
-              <TopBar
-                selectedMonth={selectedMonth}
-                onMonthChange={setSelectedMonth}
-                availableMonths={availableMonths}
-              />
-              <main className="flex-1 overflow-y-auto p-6">
-                {activePage === 'dashboard' && <DashboardPage selectedMonth={selectedMonth} />}
-                {activePage === 'transactions' && <TransactionsPage />}
-                {activePage === 'breakdown' && <BreakdownPage selectedMonth={selectedMonth} />}
-                {activePage === 'totals' && <TotalsPage />}
-                {activePage === 'tips' && <TipsPage selectedMonth={selectedMonth} />}
-                {activePage === 'calculator' && <CalculatorPage />}
-                {activePage === 'categories' && <CategoriesPage />}
-              </main>
+          <CategoryRulesContext.Provider value={rulesState}>
+            <div className="flex h-screen bg-gray-50 overflow-hidden">
+              <Sidebar activePage={activePage} onNavigate={setActivePage} />
+              <div className="flex-1 flex flex-col min-w-0">
+                <TopBar
+                  selectedMonth={selectedMonth}
+                  onMonthChange={setSelectedMonth}
+                  availableMonths={availableMonths}
+                />
+                <main className="flex-1 overflow-y-auto p-6">
+                  {activePage === 'dashboard' && <DashboardPage selectedMonth={selectedMonth} />}
+                  {activePage === 'transactions' && <TransactionsPage />}
+                  {activePage === 'breakdown' && <BreakdownPage selectedMonth={selectedMonth} />}
+                  {activePage === 'totals' && <TotalsPage />}
+                  {activePage === 'tips' && <TipsPage selectedMonth={selectedMonth} />}
+                  {activePage === 'calculator' && <CalculatorPage />}
+                  {activePage === 'categories' && <CategoriesPage />}
+                </main>
+              </div>
             </div>
-          </div>
+          </CategoryRulesContext.Provider>
         </CategoryContext.Provider>
       </BudgetContext.Provider>
     </TransactionContext.Provider>

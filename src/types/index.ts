@@ -53,6 +53,12 @@ export interface CustomCategory {
   color: string;
 }
 
+export interface CategoryRule {
+  descriptionNorm: string; // normalized for matching
+  descriptionRaw: string;  // original for display
+  category: string;
+}
+
 export type Page =
   | 'dashboard'
   | 'transactions'

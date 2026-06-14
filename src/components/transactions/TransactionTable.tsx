@@ -1,6 +1,7 @@
 import { useState, useContext } from 'react';
 import type { Transaction } from '../../types';
-import { CategoryContext } from '../../App';
+import { CategoryContext, TransactionContext, CategoryRulesContext } from '../../App';
+import { normalizeDesc } from '../../hooks/useCategoryRules';
 
 interface Props {
   transactions: Transaction[];
@@ -13,17 +14,31 @@ const PAGE_SIZE = 20;
 type SortField = 'date' | 'description' | 'category' | 'amount';
 type SortDir = 'asc' | 'desc';
 
+interface UpdatePrompt {
+  description: string;
+  newCategory: string;
+  count: number;
+}
+
 function formatDate(d: string): string {
   const [y, m, day] = d.split('-');
   return `${day}/${m}/${y}`;
 }
 
+function truncate(s: string, max = 35): string {
+  return s.length > max ? s.slice(0, max) + '…' : s;
+}
+
 export function TransactionTable({ transactions, onUpdateCategory, onDelete }: Props) {
   const { allCategories, getCategoryColor } = useContext(CategoryContext);
+  const { updateCategoryByDescription } = useContext(TransactionContext);
+  const { addRule } = useContext(CategoryRulesContext);
+
   const [page, setPage] = useState(1);
   const [sortField, setSortField] = useState<SortField>('date');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [search, setSearch] = useState('');
+  const [updatePrompt, setUpdatePrompt] = useState<UpdatePrompt | null>(null);
 
   function handleSort(field: SortField) {
     if (sortField === field) {
@@ -33,6 +48,30 @@ export function TransactionTable({ transactions, onUpdateCategory, onDelete }: P
       setSortDir('desc');
     }
     setPage(1);
+  }
+
+  function handleCategoryChange(t: Transaction, newCategory: string) {
+    onUpdateCategory(t.id, newCategory);
+    addRule(t.description, newCategory);
+
+    const norm = normalizeDesc(t.description);
+    const similarCount = transactions.filter(
+      tx => tx.id !== t.id &&
+            normalizeDesc(tx.description) === norm &&
+            tx.category !== newCategory
+    ).length;
+
+    if (similarCount > 0) {
+      setUpdatePrompt({ description: t.description, newCategory, count: similarCount });
+    } else {
+      setUpdatePrompt(null);
+    }
+  }
+
+  function handleUpdateAll() {
+    if (!updatePrompt) return;
+    updateCategoryByDescription(updatePrompt.description, updatePrompt.newCategory);
+    setUpdatePrompt(null);
   }
 
   const filtered = transactions.filter(t =>
@@ -70,6 +109,34 @@ export function TransactionTable({ transactions, onUpdateCategory, onDelete }: P
         <span className="text-sm text-gray-500">{filtered.length} transactions</span>
       </div>
 
+      {updatePrompt && (
+        <div className="bg-amber-50 border border-amber-300 rounded-lg px-4 py-3 flex items-center justify-between gap-4">
+          <p className="text-sm text-amber-900">
+            Found <strong>{updatePrompt.count}</strong> other{' '}
+            <span className="font-mono bg-amber-100 px-1 rounded text-xs">
+              "{truncate(updatePrompt.description)}"
+            </span>{' '}
+            transaction{updatePrompt.count !== 1 ? 's' : ''} in a different category.
+            Update {updatePrompt.count !== 1 ? 'them' : 'it'} all to{' '}
+            <strong>"{updatePrompt.newCategory}"</strong>?
+          </p>
+          <div className="flex gap-2 shrink-0">
+            <button
+              onClick={handleUpdateAll}
+              className="px-3 py-1.5 text-sm bg-amber-600 text-white rounded-lg hover:bg-amber-700 font-medium"
+            >
+              Update All
+            </button>
+            <button
+              onClick={() => setUpdatePrompt(null)}
+              className="px-3 py-1.5 text-sm border border-amber-300 text-amber-800 rounded-lg hover:bg-amber-100"
+            >
+              Skip
+            </button>
+          </div>
+        </div>
+      )}
+
       {filtered.length === 0 ? (
         <div className="text-center py-12 text-gray-400">
           <div className="text-4xl mb-2">💳</div>
@@ -101,7 +168,7 @@ export function TransactionTable({ transactions, onUpdateCategory, onDelete }: P
                     <td className="px-4 py-3">
                       <select
                         value={t.category}
-                        onChange={e => onUpdateCategory(t.id, e.target.value)}
+                        onChange={e => handleCategoryChange(t, e.target.value)}
                         className="border border-gray-200 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
                         style={{ color: getCategoryColor(t.category) }}
                       >

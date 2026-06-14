@@ -17,28 +17,21 @@ function findColumn(headers: string[], aliases: string[]): string | null {
 
 function parseDate(raw: string): string | null {
   raw = raw.trim();
-  // ISO: 2025-03-15
   if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
-  // DD/MM/YYYY or MM/DD/YYYY — try both, prefer DD/MM/YYYY
   const parts = raw.split(/[\/\-\.]/);
   if (parts.length === 3) {
     const [a, b, c] = parts.map(Number);
     if (c > 1900) {
-      // DD/MM/YYYY
       if (a >= 1 && a <= 31 && b >= 1 && b <= 12) {
         return `${c}-${String(b).padStart(2, '0')}-${String(a).padStart(2, '0')}`;
       }
     }
     if (a > 1900) {
-      // YYYY/MM/DD
       return `${a}-${String(b).padStart(2, '0')}-${String(c).padStart(2, '0')}`;
     }
   }
-  // Try native Date
   const d = new Date(raw);
-  if (!isNaN(d.getTime())) {
-    return d.toISOString().slice(0, 10);
-  }
+  if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
   return null;
 }
 
@@ -52,12 +45,14 @@ function parseAmount(raw: string): number | null {
 export interface ParseResult {
   transactions: Transaction[];
   skipped: number;
+  ruleApplied: number; // how many were categorized by saved rules
   error?: string;
 }
 
 export function parseCSV(
   file: File,
   existingTransactions: Transaction[],
+  applyRule?: (description: string) => string | null,
 ): Promise<ParseResult> {
   return new Promise((resolve) => {
     Papa.parse(file, {
@@ -66,7 +61,7 @@ export function parseCSV(
       complete: (results) => {
         const headers = results.meta.fields ?? [];
         if (headers.length === 0) {
-          resolve({ transactions: [], skipped: 0, error: 'No columns found in CSV.' });
+          resolve({ transactions: [], skipped: 0, ruleApplied: 0, error: 'No columns found in CSV.' });
           return;
         }
 
@@ -78,6 +73,7 @@ export function parseCSV(
           resolve({
             transactions: [],
             skipped: 0,
+            ruleApplied: 0,
             error: `Could not find required columns. Need: date (${DATE_ALIASES.join('/')}), description (${DESC_ALIASES.join('/')}), amount (${AMOUNT_ALIASES.join('/')}).`,
           });
           return;
@@ -89,6 +85,7 @@ export function parseCSV(
 
         const transactions: Transaction[] = [];
         let skipped = 0;
+        let ruleApplied = 0;
 
         for (const row of results.data as Record<string, string>[]) {
           const rawDate = row[dateCol] ?? '';
@@ -101,7 +98,6 @@ export function parseCSV(
 
           if (!date || !description || rawAmt === null) { skipped++; continue; }
           if (rawAmt === 0) { skipped++; continue; }
-          // Only import expenses (negative amounts)
           if (rawAmt > 0) { skipped++; continue; }
 
           const amount = Math.abs(rawAmt);
@@ -109,20 +105,23 @@ export function parseCSV(
           if (existing.has(key)) { skipped++; continue; }
           existing.add(key);
 
+          const ruleCategory = applyRule?.(description) ?? null;
+          if (ruleCategory) ruleApplied++;
+
           transactions.push({
             id: crypto.randomUUID(),
             date,
             description,
             amount,
-            category: categorize(description),
+            category: ruleCategory ?? categorize(description),
             source: 'csv',
           });
         }
 
-        resolve({ transactions, skipped });
+        resolve({ transactions, skipped, ruleApplied });
       },
       error: (err) => {
-        resolve({ transactions: [], skipped: 0, error: err.message });
+        resolve({ transactions: [], skipped: 0, ruleApplied: 0, error: err.message });
       },
     });
   });

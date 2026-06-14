@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { Transaction, Category } from '../types';
+import type { Transaction } from '../types';
 import { loadTransactions, saveTransactions } from '../utils/storage';
+import { normalizeDesc } from './useCategoryRules';
 
 export function useTransactions() {
   const [transactions, setTransactions] = useState<Transaction[]>(() => loadTransactions());
@@ -13,9 +14,16 @@ export function useTransactions() {
     setTransactions(prev => [...incoming, ...prev]);
   }, []);
 
-  const updateCategory = useCallback((id: string, category: Category) => {
+  const updateCategory = useCallback((id: string, category: string) => {
     setTransactions(prev =>
       prev.map(t => (t.id === id ? { ...t, category } : t))
+    );
+  }, []);
+
+  const updateCategoryByDescription = useCallback((descriptionRaw: string, category: string) => {
+    const norm = normalizeDesc(descriptionRaw);
+    setTransactions(prev =>
+      prev.map(t => normalizeDesc(t.description) === norm ? { ...t, category } : t)
     );
   }, []);
 
@@ -27,5 +35,5 @@ export function useTransactions() {
     setTransactions([]);
   }, []);
 
-  return { transactions, addTransactions, updateCategory, deleteTransaction, clearAll };
+  return { transactions, addTransactions, updateCategory, updateCategoryByDescription, deleteTransaction, clearAll };
 }
