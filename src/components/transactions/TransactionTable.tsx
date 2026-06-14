@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import type { Transaction } from '../../types';
 import { CategoryContext, TransactionContext, CategoryRulesContext } from '../../App';
 import { normalizeDesc } from '../../hooks/useCategoryRules';
@@ -39,6 +39,10 @@ export function TransactionTable({ transactions, onUpdateCategory, onDelete }: P
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [search, setSearch] = useState('');
   const [updatePrompt, setUpdatePrompt] = useState<UpdatePrompt | null>(null);
+
+  useEffect(() => {
+    setPage(1);
+  }, [transactions]);
 
   function handleSort(field: SortField) {
     if (sortField === field) {
