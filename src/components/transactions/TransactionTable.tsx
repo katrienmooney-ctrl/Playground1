@@ -1,11 +1,10 @@
-import { useState } from 'react';
-import type { Transaction, Category } from '../../types';
-import { ALL_CATEGORIES } from '../../types';
-import { CATEGORY_COLORS } from '../../constants/categories';
+import { useState, useContext } from 'react';
+import type { Transaction } from '../../types';
+import { CategoryContext } from '../../App';
 
 interface Props {
   transactions: Transaction[];
-  onUpdateCategory: (id: string, category: Category) => void;
+  onUpdateCategory: (id: string, category: string) => void;
   onDelete: (id: string) => void;
 }
 
@@ -20,6 +19,7 @@ function formatDate(d: string): string {
 }
 
 export function TransactionTable({ transactions, onUpdateCategory, onDelete }: Props) {
+  const { allCategories, getCategoryColor } = useContext(CategoryContext);
   const [page, setPage] = useState(1);
   const [sortField, setSortField] = useState<SortField>('date');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
@@ -101,11 +101,11 @@ export function TransactionTable({ transactions, onUpdateCategory, onDelete }: P
                     <td className="px-4 py-3">
                       <select
                         value={t.category}
-                        onChange={e => onUpdateCategory(t.id, e.target.value as Category)}
+                        onChange={e => onUpdateCategory(t.id, e.target.value)}
                         className="border border-gray-200 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        style={{ color: CATEGORY_COLORS[t.category] }}
+                        style={{ color: getCategoryColor(t.category) }}
                       >
-                        {ALL_CATEGORIES.map(c => (
+                        {allCategories.map(c => (
                           <option key={c} value={c}>{c}</option>
                         ))}
                       </select>

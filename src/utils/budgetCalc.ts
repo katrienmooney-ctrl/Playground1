@@ -1,4 +1,4 @@
-import type { Transaction, BudgetLimits, CategorySummary, Category, Tip } from '../types';
+import type { Transaction, BudgetLimits, CategorySummary, Tip } from '../types';
 import { ALL_CATEGORIES } from '../types';
 import { TIP_TEMPLATES } from '../constants/tips';
 
@@ -7,9 +7,12 @@ export function filterByMonth(transactions: Transaction[], month: string): Trans
   return transactions.filter(t => t.date.startsWith(month));
 }
 
-export function sumByCategory(transactions: Transaction[]): Record<Category, number> {
-  const sums = {} as Record<Category, number>;
-  for (const cat of ALL_CATEGORIES) sums[cat] = 0;
+export function sumByCategory(
+  transactions: Transaction[],
+  categories: string[] = ALL_CATEGORIES,
+): Record<string, number> {
+  const sums: Record<string, number> = {};
+  for (const cat of categories) sums[cat] = 0;
   for (const t of transactions) {
     sums[t.category] = (sums[t.category] ?? 0) + t.amount;
   }
@@ -28,11 +31,12 @@ export function buildSummaries(
   transactions: Transaction[],
   budgets: BudgetLimits,
   month: string,
+  categories: string[] = ALL_CATEGORIES,
 ): CategorySummary[] {
   const filtered = filterByMonth(transactions, month);
-  const sums = sumByCategory(filtered);
-  return ALL_CATEGORIES.map(cat => {
-    const spent = sums[cat];
+  const sums = sumByCategory(filtered, categories);
+  return categories.map(cat => {
+    const spent = sums[cat] ?? 0;
     const limit = budgets[cat] ?? 0;
     const percentage = limit > 0 ? (spent / limit) * 100 : 0;
     return { category: cat, spent, limit, percentage, status: getStatus(spent, limit) };
@@ -45,9 +49,12 @@ export function getAvailableMonths(transactions: Transaction[]): string[] {
   return Array.from(months).sort((a, b) => b.localeCompare(a));
 }
 
-export function computeOverallTotals(transactions: Transaction[]) {
+export function computeOverallTotals(
+  transactions: Transaction[],
+  categories: string[] = ALL_CATEGORIES,
+) {
   const total = transactions.reduce((s, t) => s + t.amount, 0);
-  const byCategory = sumByCategory(transactions);
+  const byCategory = sumByCategory(transactions, categories);
 
   const monthlyTotals: Record<string, number> = {};
   for (const t of transactions) {
@@ -61,10 +68,10 @@ export function computeOverallTotals(transactions: Transaction[]) {
       ? Object.values(monthlyTotals).reduce((s, v) => s + v, 0) / sortedMonths.length
       : 0;
 
-  let biggestCategory: Category = 'Other';
+  let biggestCategory = 'Other';
   let maxSpend = 0;
-  for (const cat of ALL_CATEGORIES) {
-    if (byCategory[cat] > maxSpend) {
+  for (const cat of categories) {
+    if ((byCategory[cat] ?? 0) > maxSpend) {
       maxSpend = byCategory[cat];
       biggestCategory = cat;
     }
@@ -82,20 +89,22 @@ export function generateTips(summaries: CategorySummary[]): Tip[] {
   overItems
     .sort((a, b) => b.percentage - a.percentage)
     .forEach(s => {
+      const template = TIP_TEMPLATES[s.category as keyof typeof TIP_TEMPLATES];
       tips.push({
         category: s.category,
         severity: 'over',
-        message: TIP_TEMPLATES[s.category].over,
+        message: template?.over ?? `You've exceeded your ${s.category} budget. Review your spending in this category and identify areas to cut back.`,
       });
     });
 
   warnItems
     .sort((a, b) => b.percentage - a.percentage)
     .forEach(s => {
+      const template = TIP_TEMPLATES[s.category as keyof typeof TIP_TEMPLATES];
       tips.push({
         category: s.category,
         severity: 'warning',
-        message: TIP_TEMPLATES[s.category].warning,
+        message: template?.warning ?? `Your ${s.category} spending is nearing the limit. Consider slowing down purchases in this category for the rest of the month.`,
       });
     });
 

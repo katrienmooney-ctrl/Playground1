@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { TransactionContext, BudgetContext } from '../App';
+import { TransactionContext, BudgetContext, CategoryContext } from '../App';
 import { buildSummaries, generateTips } from '../utils/budgetCalc';
 import { SavingsTips } from '../components/tips/SavingsTips';
 
@@ -10,7 +10,8 @@ interface Props {
 export function TipsPage({ selectedMonth }: Props) {
   const { transactions } = useContext(TransactionContext);
   const { budgets } = useContext(BudgetContext);
-  const summaries = buildSummaries(transactions, budgets, selectedMonth);
+  const { allCategories } = useContext(CategoryContext);
+  const summaries = buildSummaries(transactions, budgets, selectedMonth, allCategories);
   const tips = generateTips(summaries);
 
   const hasLimits = Object.values(budgets).some(v => v > 0);

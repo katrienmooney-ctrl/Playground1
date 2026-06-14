@@ -1,5 +1,6 @@
+import { useContext } from 'react';
 import type { CategorySummary } from '../../types';
-import { CATEGORY_COLORS } from '../../constants/categories';
+import { CategoryContext } from '../../App';
 
 interface Props {
   summary: CategorySummary;
@@ -25,9 +26,10 @@ const STATUS_BADGE = {
 };
 
 export function CategoryCard({ summary, onSetLimit }: Props) {
+  const { getCategoryColor } = useContext(CategoryContext);
   const { category, spent, limit, percentage, status } = summary;
   const displayPct = Math.min(percentage, 100);
-  const color = CATEGORY_COLORS[category];
+  const color = getCategoryColor(category);
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-3">

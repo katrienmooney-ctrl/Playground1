@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { TransactionContext, BudgetContext } from '../App';
+import { TransactionContext, BudgetContext, CategoryContext } from '../App';
 import { buildSummaries } from '../utils/budgetCalc';
 import { MonthlyBreakdown } from '../components/breakdown/MonthlyBreakdown';
 
@@ -10,7 +10,8 @@ interface Props {
 export function BreakdownPage({ selectedMonth }: Props) {
   const { transactions } = useContext(TransactionContext);
   const { budgets } = useContext(BudgetContext);
-  const summaries = buildSummaries(transactions, budgets, selectedMonth);
+  const { allCategories } = useContext(CategoryContext);
+  const summaries = buildSummaries(transactions, budgets, selectedMonth, allCategories);
 
   return (
     <div className="space-y-5">

@@ -1,5 +1,6 @@
-import type { Tip, Category } from '../../types';
-import { CATEGORY_COLORS } from '../../constants/categories';
+import { useContext } from 'react';
+import type { Tip } from '../../types';
+import { CategoryContext } from '../../App';
 
 interface Props {
   tips: Tip[];
@@ -12,6 +13,8 @@ const SEVERITY_STYLES = {
 };
 
 export function SavingsTips({ tips }: Props) {
+  const { getCategoryColor } = useContext(CategoryContext);
+
   if (tips.length === 0) {
     return (
       <div className="text-center py-16 text-gray-400">
@@ -25,9 +28,7 @@ export function SavingsTips({ tips }: Props) {
     <div className="space-y-3">
       {tips.map((tip, i) => {
         const s = SEVERITY_STYLES[tip.severity];
-        const catColor = tip.category !== 'General'
-          ? CATEGORY_COLORS[tip.category as Category]
-          : '#3b82f6';
+        const catColor = tip.category !== 'General' ? getCategoryColor(tip.category) : '#3b82f6';
 
         return (
           <div key={i} className={`rounded-xl border ${s.border} ${s.bg} p-4 flex gap-4`}>

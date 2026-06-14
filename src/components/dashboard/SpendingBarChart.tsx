@@ -1,30 +1,19 @@
+import { useContext } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, Cell,
 } from 'recharts';
 import type { CategorySummary } from '../../types';
-import { CATEGORY_COLORS } from '../../constants/categories';
+import { CategoryContext } from '../../App';
 
 interface Props {
   summaries: CategorySummary[];
 }
 
-const SHORT_LABELS: Record<string, string> = {
-  Groceries: 'Groc',
-  Dining: 'Dining',
-  Transport: 'Trans',
-  Entertainment: 'Entmt',
-  Shopping: 'Shop',
-  Utilities: 'Utils',
-  Healthcare: 'Health',
-  Travel: 'Travel',
-  'Personal Care': 'P.Care',
-  Subscriptions: 'Subs',
-  Other: 'Other',
-};
-
 export function SpendingBarChart({ summaries }: Props) {
+  const { getCategoryColor } = useContext(CategoryContext);
+
   const data = summaries.map(s => ({
-    name: SHORT_LABELS[s.category] ?? s.category,
+    name: s.category.length > 7 ? s.category.slice(0, 6) + '…' : s.category,
     fullName: s.category,
     Spent: parseFloat(s.spent.toFixed(2)),
     Limit: s.limit > 0 ? parseFloat(s.limit.toFixed(2)) : undefined,
@@ -42,7 +31,7 @@ export function SpendingBarChart({ summaries }: Props) {
         <Legend />
         <Bar dataKey="Spent" radius={[4, 4, 0, 0]}>
           {summaries.map(s => (
-            <Cell key={s.category} fill={CATEGORY_COLORS[s.category]} />
+            <Cell key={s.category} fill={getCategoryColor(s.category)} />
           ))}
         </Bar>
         <Bar dataKey="Limit" fill="#e5e7eb" radius={[4, 4, 0, 0]} />

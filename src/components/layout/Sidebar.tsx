@@ -12,6 +12,7 @@ const NAV_ITEMS: { page: Page; label: string; icon: string }[] = [
   { page: 'totals', label: 'Overall Totals', icon: '🧾' },
   { page: 'tips', label: 'Saving Tips', icon: '💡' },
   { page: 'calculator', label: 'Investment Calculator', icon: '📈' },
+  { page: 'categories', label: 'Categories', icon: '🏷️' },
 ];
 
 export function Sidebar({ activePage, onNavigate }: Props) {

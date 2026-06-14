@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import type { Transaction, CategorySummary } from '../../types';
-import { CATEGORY_COLORS } from '../../constants/categories';
+import { CategoryContext } from '../../App';
 import { filterByMonth } from '../../utils/budgetCalc';
 
 interface Props {
@@ -22,6 +22,7 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 export function MonthlyBreakdown({ summaries, transactions, selectedMonth }: Props) {
+  const { getCategoryColor } = useContext(CategoryContext);
   const [expandedCat, setExpandedCat] = useState<string | null>(null);
   const filtered = filterByMonth(transactions, selectedMonth);
 
@@ -62,7 +63,7 @@ export function MonthlyBreakdown({ summaries, transactions, selectedMonth }: Pro
                   >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: CATEGORY_COLORS[s.category] }} />
+                        <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: getCategoryColor(s.category) }} />
                         <span className="font-medium text-gray-800">{s.category}</span>
                         <span className="text-gray-400 text-xs">{isExpanded ? '▲' : '▼'}</span>
                       </div>

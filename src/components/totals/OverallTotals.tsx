@@ -1,10 +1,12 @@
+import { useContext } from 'react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
 import type { Transaction } from '../../types';
 import { computeOverallTotals } from '../../utils/budgetCalc';
-import { CATEGORY_COLORS } from '../../constants/categories';
+import { CategoryContext } from '../../App';
 
 interface Props {
   transactions: Transaction[];
+  categories: string[];
 }
 
 function formatMonth(m: string): string {
@@ -12,7 +14,9 @@ function formatMonth(m: string): string {
   return new Date(Number(y), Number(mo) - 1).toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
 }
 
-export function OverallTotals({ transactions }: Props) {
+export function OverallTotals({ transactions, categories }: Props) {
+  const { getCategoryColor } = useContext(CategoryContext);
+
   if (transactions.length === 0) {
     return (
       <div className="text-center py-16 text-gray-400">
@@ -23,7 +27,8 @@ export function OverallTotals({ transactions }: Props) {
     );
   }
 
-  const { total, byCategory, monthlyTotals, sortedMonths, averageMonthly, biggestCategory } = computeOverallTotals(transactions);
+  const { total, byCategory, monthlyTotals, sortedMonths, averageMonthly, biggestCategory } =
+    computeOverallTotals(transactions, categories);
 
   const pieData = Object.entries(byCategory)
     .filter(([, v]) => v > 0)
@@ -49,9 +54,17 @@ export function OverallTotals({ transactions }: Props) {
           <h3 className="font-semibold text-gray-700 mb-4">Spending by Category</h3>
           <ResponsiveContainer width="100%" height={260}>
             <PieChart>
-              <Pie data={pieData} cx="50%" cy="50%" outerRadius={90} dataKey="value" label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`} labelLine={false}>
+              <Pie
+                data={pieData}
+                cx="50%"
+                cy="50%"
+                outerRadius={90}
+                dataKey="value"
+                label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
+                labelLine={false}
+              >
                 {pieData.map(entry => (
-                  <Cell key={entry.name} fill={CATEGORY_COLORS[entry.name as keyof typeof CATEGORY_COLORS] ?? '#94a3b8'} />
+                  <Cell key={entry.name} fill={getCategoryColor(entry.name)} />
                 ))}
               </Pie>
               <Tooltip formatter={v => `$${Number(v).toFixed(2)}`} />

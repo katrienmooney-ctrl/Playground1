@@ -1,23 +1,25 @@
-import { useState } from 'react';
-import type { Transaction, Category } from '../../types';
-import { ALL_CATEGORIES } from '../../types';
+import { useState, useContext } from 'react';
+import type { Transaction } from '../../types';
 import { categorize } from '../../utils/categorize';
+import { CategoryContext } from '../../App';
 
 interface Props {
   onAdd: (transaction: Transaction) => void;
 }
 
 export function ManualEntryForm({ onAdd }: Props) {
+  const { allCategories } = useContext(CategoryContext);
   const today = new Date().toISOString().slice(0, 10);
   const [date, setDate] = useState(today);
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
-  const [category, setCategory] = useState<Category>('Other');
+  const [category, setCategory] = useState('Other');
   const [success, setSuccess] = useState(false);
 
   function handleDescriptionBlur() {
     if (description.trim()) {
-      setCategory(categorize(description));
+      const detected = categorize(description);
+      setCategory(allCategories.includes(detected) ? detected : 'Other');
     }
   }
 
@@ -86,10 +88,10 @@ export function ManualEntryForm({ onAdd }: Props) {
         <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
         <select
           value={category}
-          onChange={e => setCategory(e.target.value as Category)}
+          onChange={e => setCategory(e.target.value)}
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          {ALL_CATEGORIES.map(c => (
+          {allCategories.map(c => (
             <option key={c} value={c}>{c}</option>
           ))}
         </select>

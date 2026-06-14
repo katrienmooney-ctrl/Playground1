@@ -1,5 +1,10 @@
 import type { Category } from '../types';
 
+export const CUSTOM_COLOR_PALETTE = [
+  '#06b6d4', '#10b981', '#d97706', '#7c3aed', '#be185d',
+  '#0e7490', '#dc2626', '#0369a1', '#15803d', '#b45309',
+];
+
 export const CATEGORY_KEYWORDS: Record<Category, string[]> = {
   Groceries: [
     'woolworths', 'coles', 'aldi', 'iga ', 'costco', 'harris farm',

@@ -1,17 +1,6 @@
-export type Category =
-  | 'Groceries'
-  | 'Dining'
-  | 'Transport'
-  | 'Entertainment'
-  | 'Shopping'
-  | 'Utilities'
-  | 'Healthcare'
-  | 'Travel'
-  | 'Personal Care'
-  | 'Subscriptions'
-  | 'Other';
+export type Category = string;
 
-export const ALL_CATEGORIES: Category[] = [
+export const ALL_CATEGORIES: string[] = [
   'Groceries',
   'Dining',
   'Transport',
@@ -27,10 +16,10 @@ export const ALL_CATEGORIES: Category[] = [
 
 export interface Transaction {
   id: string;
-  date: string; // "YYYY-MM-DD"
+  date: string;
   description: string;
-  amount: number; // positive (absolute value of expense)
-  category: Category;
+  amount: number;
+  category: string;
   source: 'csv' | 'manual';
 }
 
@@ -39,7 +28,7 @@ export interface BudgetLimits {
 }
 
 export interface CategorySummary {
-  category: Category;
+  category: string;
   spent: number;
   limit: number;
   percentage: number;
@@ -54,9 +43,14 @@ export interface YearlyProjection {
 }
 
 export interface Tip {
-  category: Category | 'General';
+  category: string;
   severity: 'info' | 'warning' | 'over';
   message: string;
+}
+
+export interface CustomCategory {
+  name: string;
+  color: string;
 }
 
 export type Page =
@@ -65,4 +59,5 @@ export type Page =
   | 'breakdown'
   | 'totals'
   | 'tips'
-  | 'calculator';
+  | 'calculator'
+  | 'categories';

@@ -1,9 +1,8 @@
 import { useContext } from 'react';
-import { TransactionContext, BudgetContext } from '../App';
+import { TransactionContext, BudgetContext, CategoryContext } from '../App';
 import { buildSummaries } from '../utils/budgetCalc';
 import { DashboardGrid } from '../components/dashboard/DashboardGrid';
 import { SpendingBarChart } from '../components/dashboard/SpendingBarChart';
-import type { Category } from '../types';
 
 interface Props {
   selectedMonth: string;
@@ -12,8 +11,9 @@ interface Props {
 export function DashboardPage({ selectedMonth }: Props) {
   const { transactions } = useContext(TransactionContext);
   const { budgets, setBudget } = useContext(BudgetContext);
+  const { allCategories } = useContext(CategoryContext);
 
-  const summaries = buildSummaries(transactions, budgets, selectedMonth);
+  const summaries = buildSummaries(transactions, budgets, selectedMonth, allCategories);
   const hasData = transactions.length > 0;
 
   const overCount = summaries.filter(s => s.status === 'over' && s.limit > 0).length;
@@ -38,10 +38,7 @@ export function DashboardPage({ selectedMonth }: Props) {
         </div>
       ) : (
         <>
-          <DashboardGrid
-            summaries={summaries}
-            onSetLimit={(cat, amt) => setBudget(cat as Category, amt)}
-          />
+          <DashboardGrid summaries={summaries} onSetLimit={setBudget} />
           <div className="bg-white rounded-xl border border-gray-200 p-4">
             <h2 className="font-semibold text-gray-700 mb-4">Spending vs Budget</h2>
             <SpendingBarChart summaries={summaries} />
