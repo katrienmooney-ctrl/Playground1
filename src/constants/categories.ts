@@ -1,0 +1,92 @@
+import type { Category } from '../types';
+
+export const CATEGORY_KEYWORDS: Record<Category, string[]> = {
+  Groceries: [
+    'woolworths', 'coles', 'aldi', 'iga ', 'costco', 'harris farm',
+    'supermarket', 'grocery', 'fresh market', 'trader joe', 'whole foods',
+    'safeway', 'kroger', 'publix', 'lidl', 'tesco', 'waitrose', 'spar',
+    'food lion', 'stop & shop', 'giant food',
+  ],
+  Dining: [
+    'restaurant', 'cafe', 'coffee', 'mcdonald', 'kfc ', 'subway',
+    'domino', 'pizza', 'sushi', 'burger', 'grill', 'bistro', 'diner',
+    'bakery', 'starbucks', 'doordash', 'uber eats', 'menulog', 'deliveroo',
+    'takeaway', 'takeout', 'bar ', 'pub ', 'brewery', 'food court',
+    'hungry jack', 'nandos', 'guzman', 'el jannah', 'chipotle', 'taco bell',
+    'wendy\'s', 'chick-fil', 'panera', 'dunkin', 'tim horton',
+  ],
+  Transport: [
+    'uber', 'lyft', 'taxi', 'ola ', 'didi', 'bolt ride',
+    'transport', 'opal', 'myki', 'go card', 'train', 'bus fare',
+    'metro ', 'petrol', 'fuel', 'bp ', 'shell ', 'caltex', '7-eleven fuel',
+    'parking', 'toll ', 'citylink', 'linkt', 'e-toll', 'car wash',
+    'mechanic', 'autocare', 'roadside', 'exxon', 'chevron', 'sunoco',
+    'marathon fuel', 'speedway gas',
+  ],
+  Entertainment: [
+    'cinema', 'event ticket', 'concert', 'theatre', 'museum',
+    'hoyts', 'village cinema', 'event cinemas', 'steam ', 'playstation',
+    'xbox', 'nintendo', 'google play', 'amusement', 'bowling',
+    'escape room', 'laser tag', 'arcade', 'ticketmaster', 'eventbrite',
+    'stubhub', 'fandango', 'amc theatre', 'regal cinema',
+  ],
+  Shopping: [
+    'amazon', 'ebay', 'target', 'kmart', 'big w', 'myer', 'david jones',
+    'h&m', 'zara', 'uniqlo', 'cotton on', 'factorie', 'the iconic',
+    'asos', 'shein', 'aliexpress', 'ikea', 'bunnings', 'officeworks',
+    'jb hi-fi', 'harvey norman', 'apple store', 'nike', 'adidas',
+    'rebel sport', 'decathlon', 'chemist warehouse', 'walmart', 'best buy',
+    'home depot', 'lowe\'s', 'macy', 'nordstrom', 'tj maxx', 'ross store',
+  ],
+  Utilities: [
+    'electricity', 'gas bill', 'water bill', 'internet', 'broadband',
+    'telstra', 'optus', 'vodafone', 'tpg', 'aussie broadband',
+    'council rates', 'strata', 'origin energy', 'agl ', 'energy australia',
+    'nbn ', 'phone bill', 'mobile plan', 'at&t', 'verizon', 't-mobile',
+    'comcast', 'spectrum', 'cox comm', 'utility', 'sewage', 'waste mgmt',
+  ],
+  Healthcare: [
+    'pharmacy', 'chemist', 'doctor', 'medical', 'hospital', 'clinic',
+    'dental', 'dentist', 'optometrist', 'physio', 'physiotherapy',
+    'bulk bill', 'medicare', 'health insurance', 'medibank', 'bupa',
+    'nib ', 'hcf ', 'pathology', 'radiology', 'blood test', 'specialist',
+    'walgreens', 'cvs pharma', 'rite aid', 'urgent care', 'lab corp',
+  ],
+  Travel: [
+    'airbnb', 'booking.com', 'expedia', 'hotel', 'motel', 'resort',
+    'qantas', 'jetstar', 'virgin australia', 'tigerair', 'emirates',
+    'flight', 'airline', 'airport', 'visa fee', 'travel insurance',
+    'agoda', 'trivago', 'wotif', 'car hire', 'hertz', 'budget rent',
+    'marriott', 'hilton', 'hyatt', 'intercontinental', 'enterprise rent',
+  ],
+  'Personal Care': [
+    'haircut', 'hairdresser', 'barber', 'salon', 'nail ', 'beauty',
+    'spa ', 'massage', 'waxing', 'facial', 'cosmetics', 'makeup',
+    'priceline', 'mecca', 'sephora', 'lush ', 'the body shop',
+    'gym', 'fitness', 'yoga', 'pilates', 'crossfit', 'anytime fitness',
+    'f45', 'les mills', 'swimming', 'planet fitness', 'equinox',
+  ],
+  Subscriptions: [
+    'netflix', 'disney+', 'stan ', 'binge ', 'foxtel', 'apple tv',
+    'amazon prime', 'hbo', 'paramount+', 'peacock', 'hulu',
+    'spotify', 'apple music', 'youtube premium', 'tidal',
+    'microsoft 365', 'adobe ', 'canva', 'dropbox', 'icloud',
+    'github', 'chatgpt', 'claude', 'openai', 'patreon',
+    'membership', 'subscription', 'annual plan', 'monthly plan',
+  ],
+  Other: [],
+};
+
+export const CATEGORY_COLORS: Record<Category, string> = {
+  Groceries: '#22c55e',
+  Dining: '#f97316',
+  Transport: '#3b82f6',
+  Entertainment: '#a855f7',
+  Shopping: '#ec4899',
+  Utilities: '#6b7280',
+  Healthcare: '#14b8a6',
+  Travel: '#eab308',
+  'Personal Care': '#f43f5e',
+  Subscriptions: '#8b5cf6',
+  Other: '#94a3b8',
+};
