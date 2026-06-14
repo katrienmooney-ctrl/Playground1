@@ -181,7 +181,9 @@ export function TransactionTable({ transactions, onUpdateCategory, onDelete }: P
                         ))}
                       </select>
                     </td>
-                    <td className="px-4 py-3 text-gray-800 font-medium">${t.amount.toFixed(2)}</td>
+                    <td className={`px-4 py-3 font-medium ${t.amount < 0 ? 'text-green-600' : 'text-gray-800'}`}>
+                      {t.amount < 0 ? `+$${Math.abs(t.amount).toFixed(2)}` : `$${t.amount.toFixed(2)}`}
+                    </td>
                     <td className="px-4 py-3">
                       <button
                         onClick={() => onDelete(t.id)}

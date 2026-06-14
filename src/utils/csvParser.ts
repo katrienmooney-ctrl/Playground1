@@ -104,9 +104,9 @@ export function parseCSV(
 
           if (!date || !description || rawAmt === null) { skipped++; continue; }
           if (rawAmt === 0) { skipped++; continue; }
-          if (rawAmt > 0) { skipped++; continue; }
 
-          const amount = Math.abs(rawAmt);
+          // Expenses (negative CSV amounts) stored as positive; credits (positive) stored as negative
+          const amount = -rawAmt;
           const key = `${date}|${description}|${amount}`;
           if (existing.has(key)) { skipped++; continue; }
           existing.add(key);
