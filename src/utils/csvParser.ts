@@ -22,11 +22,17 @@ function parseDate(raw: string): string | null {
   if (parts.length === 3) {
     const [a, b, c] = parts.map(Number);
     if (c > 1900) {
-      if (a >= 1 && a <= 31 && b >= 1 && b <= 12) {
+      // Prefer MM/DD/YYYY (US format): a=month, b=day
+      if (a >= 1 && a <= 12 && b >= 1 && b <= 31) {
+        return `${c}-${String(a).padStart(2, '0')}-${String(b).padStart(2, '0')}`;
+      }
+      // DD/MM/YYYY fallback: only when day > 12 (unambiguous)
+      if (a > 12 && a <= 31 && b >= 1 && b <= 12) {
         return `${c}-${String(b).padStart(2, '0')}-${String(a).padStart(2, '0')}`;
       }
     }
     if (a > 1900) {
+      // YYYY/MM/DD
       return `${a}-${String(b).padStart(2, '0')}-${String(c).padStart(2, '0')}`;
     }
   }
